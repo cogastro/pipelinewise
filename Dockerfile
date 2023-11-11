@@ -33,6 +33,8 @@ RUN echo "setup connectors" \
     && if [ "$connectors" = "extra" ]; then make extra_connectors -e pw_acceptlicenses=y; fi\
     && if [ "$connectors" != "all" ] && [ "$connectors" != "extra" ] && [ "$connectors" != "default" ] && [ "$connectors" != "none" ] && [ ! -z $connectors ]; then make connectors -e pw_connector=$connectors -e pw_acceptlicenses=y; fi
 
+RUN pip install botocore
+
 COPY . /app
 
 RUN echo "setup pipelinewise" \

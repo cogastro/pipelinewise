@@ -1,0 +1,68 @@
+---
+
+# ------------------------------------------------------------------------------
+# General Properties
+# ------------------------------------------------------------------------------
+id: "mongodb"
+name: "MongoDB source database"
+type: "tap-mongodb"
+owner: "artur@cogastro.com"
+#send_alert: False                     # Optional: Disable all configured alerts on this tap
+
+
+# ------------------------------------------------------------------------------
+# Source (Tap) - Mongo connection details
+# ------------------------------------------------------------------------------
+db_conn:
+  host: "{{ env_var['MONGODB_HOST'] }}"               					# Mongodb host, if multiple hosts, list the hosts separated by comma
+  auth_database: "admin"         # the Mongodb database name to authenticate on
+  port: {{ env_var['MONGODB_PORT'] }}
+  dbname: "{{ env_var['MONGODB_DB'] }}"           				# Mongodb database name to sync from
+  user: "{{ env_var['MONGODB_USER'] }}"							# User with read roles
+  password: "{{ env_var['MONGODB_PASSWORD'] }}"                            # Plain string or vault encrypted
+  replica_set: "{{ env_var['MONGODB_RS'] }}"        			# Optional: Mongodb replica set name, default null
+                                                    #           Min: 1
+                                                    #           Default: number of CPU cores
+
+# ------------------------------------------------------------------------------
+# Destination (Target) - Target properties
+# Connection details should be in the relevant target YAML file
+# ------------------------------------------------------------------------------
+target: "postgres-staging"                   				# ID of the target connector where the data will be loaded
+batch_size_rows: 1000                  				# Batch size for the stream to optimise load performance
+stream_buffer_size: 0                               # In-memory buffer size (MB) between taps and targets for asynchronous data pipes
+# default_target_schema: "pipelinewise_staging"             # Optional: Default target schema where the data will be loaded
+#  - grp_power
+#batch_wait_limit_seconds: 3600                     # Optional: Maximum time to wait for `batch_size_rows`. Available only for snowflake target.
+
+# Options only for Snowflake target
+#split_large_files: False                       # Optional: split large files to multiple pieces and create multipart zip files. (Default: False)
+#split_file_chunk_size_mb: 1000                 # Optional: File chunk sizes if `split_large_files` enabled. (Default: 1000)
+#split_file_max_chunks: 20                      # Optional: Max number of chunks if `split_large_files` enabled. (Default: 20)
+#archive_load_files: False                      # Optional: when enabled, the files loaded to Snowflake will also be stored in `archive_load_files_s3_bucket`
+#archive_load_files_s3_prefix: "archive"        # Optional: When `archive_load_files` is enabled, the archived files will be placed in the archive S3 bucket under this prefix.
+#archive_load_files_s3_bucket: "<BUCKET_NAME>"  # Optional: When `archive_load_files` is enabled, the archived files will be placed in this bucket. (Default: the value of `s3_bucket` in target snowflake YAML)
+
+
+
+
+
+
+
+
+
+# ------------------------------------------------------------------------------
+# Source to target Schema mapping
+# ------------------------------------------------------------------------------
+schemas:
+  - source_schema: "rds"    				# Must be same name as dbname
+    target_schema: "{{ env_var['POSTGRES_SCHEMA'] }}"
+    tables:
+      - table_name: "changeevents"
+        replication_method: "LOG_BASED"
+      - table_name: "userauths"
+        replication_method: "LOG_BASED"
+      - table_name: "farms"
+        replication_method: "LOG_BASED"
+      - table_name: "nutritions"
+        replication_method: "LOG_BASED"
